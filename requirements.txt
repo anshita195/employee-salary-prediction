@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+catboost
+joblib
+pandas
+numpy
+pydantic 
