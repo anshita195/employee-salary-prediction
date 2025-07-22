@@ -1,8 +1,16 @@
 import streamlit as st
-import requests
-from PIL import Image
+import joblib
+import pandas as pd
 
-# Logo and header
+# Load model and columns once
+@st.cache_resource
+def load_model():
+    model = joblib.load('catboost_salary_model.joblib')
+    columns = joblib.load('model_columns.joblib')
+    return model, columns
+
+model, model_columns = load_model()
+
 st.set_page_config(page_title="Employee Salary Prediction Dashboard", layout="centered")
 
 st.markdown("""
@@ -14,7 +22,6 @@ st.markdown("""
     <hr>
 """, unsafe_allow_html=True)
 
-# Use columns for better layout
 col1, col2 = st.columns(2)
 
 with col1:
@@ -67,29 +74,21 @@ st.markdown("<hr>", unsafe_allow_html=True)
 if st.button("🎯 Predict Salary Class"):
     with st.spinner("Predicting..."):
         try:
-            api_url = "https://employee-salary-prediction-5v1d.onrender.com/predict"
-            response = requests.post(api_url, json=user_input, timeout=15)
-            if response.status_code == 200:
-                result = response.json()
-                pred = result["prediction"]
-                proba = result["probability"]
-                label = ">50K" if pred == 1 else "<=50K"
-                color = "#27ae60" if pred == 1 else "#e74c3c"
-                st.markdown(f"<h2 style='color:{color};text-align:center;'>Prediction: {label}</h2>", unsafe_allow_html=True)
-                st.progress(proba)
-                st.info(f"Probability of >50K: {proba:.2%}")
-                if pred == 1:
-                    st.balloons()
-                else:
-                    st.snow()
-            else:
-                st.error(f"API Error: {response.status_code} - {response.text}")
+            # Prepare input DataFrame in correct order
+            X = pd.DataFrame([[user_input[col] for col in model_columns]], columns=model_columns)
+            pred = model.predict(X)[0]
+            proba = float(model.predict_proba(X)[0][1])
+            label = ">50K" if pred == 1 else "<=50K"
+            color = "#27ae60" if pred == 1 else "#e74c3c"
+            st.markdown(f"<h2 style='color:{color};text-align:center;'>Prediction: {label}</h2>", unsafe_allow_html=True)
+            st.progress(proba)
+            st.info(f"Probability of >50K: {proba:.2%}")
         except Exception as e:
-            st.error(f"Request failed: {e}")
+            st.error(f"Prediction failed: {e}")
 
 st.markdown("""
     <hr>
     <div style='text-align:center;font-size:16px;'>
-        Made with ❤️ by <a href='https://github.com/anshita195' target='_blank'>Anshita</a> | Powered by FastAPI & Streamlit
+        Made with ❤️ by <a href='https://github.com/anshita195' target='_blank'>Anshita</a> | Powered by CatBoost & Streamlit
     </div>
 """, unsafe_allow_html=True) 
