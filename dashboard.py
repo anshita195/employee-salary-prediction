@@ -1,57 +1,70 @@
 import streamlit as st
 import requests
+from PIL import Image
 
+# Logo and header
 st.set_page_config(page_title="Employee Salary Prediction Dashboard", layout="centered")
-st.title("Employee Salary Prediction Dashboard")
 
-st.write("Enter employee details below to predict salary class (<=50K or >50K):")
+st.markdown("""
+    <div style='text-align:center;'>
+        <img src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png' width='100'/>
+    </div>
+    <h1 style='text-align:center; color:#4F8BF9;'>Employee Salary Prediction Dashboard</h1>
+    <p style='text-align:center;'>Enter employee details below to predict salary class (<=50K or >50K):</p>
+    <hr>
+""", unsafe_allow_html=True)
 
-# Define the input fields (update as per your model_columns)
-def get_user_input():
-    age = st.number_input("Age", min_value=18, max_value=100, value=30)
+# Use columns for better layout
+col1, col2 = st.columns(2)
+
+with col1:
+    age = st.number_input("Age", min_value=18, max_value=100, value=30, help="Employee's age (18-100)")
     workclass = st.selectbox("Workclass", [
         "Private", "Self-emp-not-inc", "Local-gov", "Unknown", "State-gov", "Self-emp-inc", "Federal-gov"
-    ])
-    fnlwgt = st.number_input("Final Weight (fnlwgt)", min_value=10000, max_value=1000000, value=50000)
+    ], help="Type of employer")
+    fnlwgt = st.number_input("Final Weight (fnlwgt)", min_value=10000, max_value=1000000, value=50000, help="Census weight (proxy for population)")
     marital_status = st.selectbox("Marital Status", [
         "Never-married", "Married-civ-spouse", "Divorced", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse"
-    ])
+    ], help="Marital status")
     occupation = st.selectbox("Occupation", [
         "Adm-clerical", "Exec-managerial", "Handlers-cleaners", "Prof-specialty", "Other-service", "Sales", "Craft-repair", "Transport-moving", "Unknown", "Machine-op-inspct", "Farming-fishing", "Tech-support", "Protective-serv", "Armed-Forces", "Priv-house-serv"
-    ])
+    ], help="Occupation type")
     relationship = st.selectbox("Relationship", [
         "Not-in-family", "Husband", "Wife", "Own-child", "Unmarried", "Other-relative"
-    ])
+    ], help="Relationship to household")
+
+with col2:
     race = st.selectbox("Race", [
         "White", "Black", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other"
-    ])
-    gender = st.selectbox("Gender", ["Male", "Female"])
+    ], help="Race")
+    gender = st.selectbox("Gender", ["Male", "Female"], help="Gender")
     native_country = st.selectbox("Native Country", [
         "United-States", "Mexico", "Philippines", "Germany", "Canada", "Puerto-Rico", "El-Salvador", "India", "Cuba", "England", "Jamaica", "Unknown"
-    ])
-    educational_num = st.number_input("Educational Num", min_value=1, max_value=16, value=10)
-    capital_gain = st.number_input("Capital Gain", min_value=0, max_value=100000, value=0)
-    capital_loss = st.number_input("Capital Loss", min_value=0, max_value=5000, value=0)
-    hours_per_week = st.number_input("Hours per Week", min_value=1, max_value=100, value=40)
-    return {
-        "age": age,
-        "workclass": workclass,
-        "fnlwgt": fnlwgt,
-        "marital-status": marital_status,
-        "occupation": occupation,
-        "relationship": relationship,
-        "race": race,
-        "gender": gender,
-        "native-country": native_country,
-        "educational-num": educational_num,
-        "capital-gain": capital_gain,
-        "capital-loss": capital_loss,
-        "hours-per-week": hours_per_week
-    }
+    ], help="Country of origin")
+    educational_num = st.number_input("Educational Num", min_value=1, max_value=16, value=10, help="Number of years of education")
+    capital_gain = st.number_input("Capital Gain", min_value=0, max_value=100000, value=0, help="Capital gain (USD)")
+    capital_loss = st.number_input("Capital Loss", min_value=0, max_value=5000, value=0, help="Capital loss (USD)")
+    hours_per_week = st.number_input("Hours per Week", min_value=1, max_value=100, value=40, help="Average hours worked per week")
 
-user_input = get_user_input()
+user_input = {
+    "age": age,
+    "workclass": workclass,
+    "fnlwgt": fnlwgt,
+    "marital-status": marital_status,
+    "occupation": occupation,
+    "relationship": relationship,
+    "race": race,
+    "gender": gender,
+    "native-country": native_country,
+    "educational-num": educational_num,
+    "capital-gain": capital_gain,
+    "capital-loss": capital_loss,
+    "hours-per-week": hours_per_week
+}
 
-if st.button("Predict Salary Class"):
+st.markdown("<hr>", unsafe_allow_html=True)
+
+if st.button("🎯 Predict Salary Class"):
     with st.spinner("Predicting..."):
         try:
             api_url = "https://employee-salary-prediction-5v1d.onrender.com/predict"
@@ -61,11 +74,22 @@ if st.button("Predict Salary Class"):
                 pred = result["prediction"]
                 proba = result["probability"]
                 label = ">50K" if pred == 1 else "<=50K"
-                st.success(f"Prediction: {label}")
+                color = "#27ae60" if pred == 1 else "#e74c3c"
+                st.markdown(f"<h2 style='color:{color};text-align:center;'>Prediction: {label}</h2>", unsafe_allow_html=True)
+                st.progress(proba)
                 st.info(f"Probability of >50K: {proba:.2%}")
+                if pred == 1:
+                    st.balloons()
+                else:
+                    st.snow()
             else:
                 st.error(f"API Error: {response.status_code} - {response.text}")
         except Exception as e:
             st.error(f"Request failed: {e}")
 
-st.caption("Powered by FastAPI + Streamlit | Deployed on Render.com") 
+st.markdown("""
+    <hr>
+    <div style='text-align:center;font-size:16px;'>
+        Made with ❤️ by <a href='https://github.com/anshita195' target='_blank'>Anshita</a> | Powered by FastAPI & Streamlit
+    </div>
+""", unsafe_allow_html=True) 
