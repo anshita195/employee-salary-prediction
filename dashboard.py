@@ -109,6 +109,6 @@ if st.button("🎯 Predict Salary Class"):
 st.markdown("""
     <hr>
     <div style='text-align:center;font-size:16px;'>
-        Made by <a href='https://github.com/anshita195' target='_blank'>Anshita</a> | Powered by CatBoost & Streamlit
+        Made by <a href='https://github.com/anshita195' target='_blank'>Anshita</a> | Streamlit
     </div>
 """, unsafe_allow_html=True) 
