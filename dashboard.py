@@ -29,7 +29,6 @@ with col1:
     workclass = st.selectbox("Workclass", [
         "Private", "Self-emp-not-inc", "Local-gov", "Unknown", "State-gov", "Self-emp-inc", "Federal-gov"
     ], help="Type of employer")
-    fnlwgt = st.number_input("Final Weight (fnlwgt)", min_value=10000, max_value=1000000, value=50000, help="Census weight (proxy for population)")
     marital_status = st.selectbox("Marital Status", [
         "Never-married", "Married-civ-spouse", "Divorced", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse"
     ], help="Marital status")
@@ -41,22 +40,43 @@ with col1:
     ], help="Relationship to household")
 
 with col2:
-    race = st.selectbox("Race", [
-        "White", "Black", "Asian-Pac-Islander", "Amer-Indian-Eskimo", "Other"
-    ], help="Race")
+    # Education mapping
+    education_mapping = {
+        'Preschool': 1,
+        '1st-4th': 2,
+        '5th-6th': 3,
+        '7th-8th': 4,
+        '9th': 5,
+        '10th': 6,
+        '11th': 7,
+        '12th': 8,
+        'HS-grad': 9,
+        'Some-college': 10,
+        'Assoc-voc': 11,
+        'Assoc-acdm': 12,
+        'Bachelors': 13,
+        'Masters': 14,
+        'Prof-school': 15,
+        'Doctorate': 16
+    }
+    education_level = st.selectbox(
+        "Education Level",
+        options=list(education_mapping.keys()),
+        help="Highest level of education completed"
+    )
+    educational_num = education_mapping[education_level]
     gender = st.selectbox("Gender", ["Male", "Female"], help="Gender")
-    native_country = st.selectbox("Native Country", [
-        "United-States", "Mexico", "Philippines", "Germany", "Canada", "Puerto-Rico", "El-Salvador", "India", "Cuba", "England", "Jamaica", "Unknown"
-    ], help="Country of origin")
-    educational_num = st.number_input("Educational Num", min_value=1, max_value=16, value=10, help="Number of years of education")
-    capital_gain = st.number_input("Capital Gain", min_value=0, max_value=100000, value=0, help="Capital gain (USD)")
-    capital_loss = st.number_input("Capital Loss", min_value=0, max_value=5000, value=0, help="Capital loss (USD)")
-    hours_per_week = st.number_input("Hours per Week", min_value=1, max_value=100, value=40, help="Average hours worked per week")
+
+# Set default values for hidden/advanced fields
+race = "Other"  # default
+native_country = "United-States"  # default
+capital_gain = 0  # default
+capital_loss = 0  # default
+hours_per_week = 40  # default, typical full-time
 
 user_input = {
     "age": age,
     "workclass": workclass,
-    "fnlwgt": fnlwgt,
     "marital-status": marital_status,
     "occupation": occupation,
     "relationship": relationship,
