@@ -26,18 +26,12 @@ col1, col2 = st.columns(2)
 
 with col1:
     age = st.number_input("Age", min_value=18, max_value=100, value=30, help="Employee's age (18-100)")
-    workclass = st.selectbox("Workclass", [
-        "Private", "Self-emp-not-inc", "Local-gov", "Unknown", "State-gov", "Self-emp-inc", "Federal-gov"
-    ], help="Type of employer")
     marital_status = st.selectbox("Marital Status", [
         "Never-married", "Married-civ-spouse", "Divorced", "Separated", "Widowed", "Married-spouse-absent", "Married-AF-spouse"
     ], help="Marital status")
     occupation = st.selectbox("Occupation", [
         "Adm-clerical", "Exec-managerial", "Handlers-cleaners", "Prof-specialty", "Other-service", "Sales", "Craft-repair", "Transport-moving", "Unknown", "Machine-op-inspct", "Farming-fishing", "Tech-support", "Protective-serv", "Armed-Forces", "Priv-house-serv"
     ], help="Occupation type")
-    relationship = st.selectbox("Relationship", [
-        "Not-in-family", "Husband", "Wife", "Own-child", "Unmarried", "Other-relative"
-    ], help="Relationship to household")
 
 with col2:
     # Education mapping
@@ -67,7 +61,9 @@ with col2:
     educational_num = education_mapping[education_level]
     gender = st.selectbox("Gender", ["Male", "Female"], help="Gender")
 
-# Set default values for hidden/advanced fields
+# Set default values for hidden/advanced fields and removed fields
+workclass = "Private"  # default
+relationship = "Not-in-family"  # default
 race = "Other"  # default
 native_country = "United-States"  # default
 capital_gain = 0  # default
